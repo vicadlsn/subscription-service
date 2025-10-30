@@ -1,0 +1,42 @@
+services:
+    postgres:
+        image: postgres:17-alpine
+        environment:
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - "${DB_PORT}:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    migrate:
+        build:
+            context: .
+            dockerfile: Dockerfile.migrate
+        environment:
+            GOOSE_DRIVER: postgres
+            GOOSE_DBSTRING: "host=postgres user=${DB_USERNAME} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable"
+            GOOSE_MIGRATION_DIR: /migration/migrations
+        depends_on:
+            postgres:
+                condition: service_healthy
+        volumes:
+            - ./migrations:/migration/migrations
+        command: ["goose", "up"]
+
+    app:
+        build: .
+        depends_on:
+            - postgres
+        ports:
+            - "8081:${SERVER_PORT}"
+        restart: "always"
+
+volumes:
+    pgdata:
