@@ -3,19 +3,12 @@ package main
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
+	"subservice/internal/app"
 	"subservice/internal/config"
-	"subservice/internal/repository"
-	"subservice/internal/service"
-	"subservice/internal/transport"
-	"subservice/pkg/postgres"
-
-	"github.com/go-playground/validator/v10"
 )
 
 const defaultConfigPath = ""
@@ -31,45 +24,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	pool, err := postgres.New(ctx, cfg.Database)
+	app, err := app.New(ctx, cfg, lg)
 	if err != nil {
-		lg.Error("Failed to connect to postgres", slog.Any("error", err))
+		lg.Error("Failed to initialize app", slog.Any("error", err))
 		os.Exit(1)
 	}
-	defer pool.Close()
 
-	repo := repository.NewSubscriptionRepository(pool)
-	svc := service.NewSubscriptionService(repo, lg)
-	v := validator.New(validator.WithRequiredStructEnabled())
-
-	router := transport.NewRouter(svc, lg, v)
-
-	addr := cfg.HTTP.Host + ":" + cfg.HTTP.Port
-	server := http.Server{
-		Addr:    addr,
-		Handler: router,
-	}
-
-	lg.Info("Starting http server", slog.String("addr", addr))
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			lg.Error("HTTP server error", slog.Any("error", err))
-		}
-	}()
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
-
-	lg.Info("Shutdown signal received")
-	cancel()
-
-	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := server.Shutdown(ctxShutdown); err != nil {
-		lg.Error("Failed to shutdown http server", slog.Any("error", err))
-	}
+	app.Run(ctx)
 }

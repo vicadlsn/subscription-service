@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"time"
 
-	"subservice/internal/models"
-
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
+
+	"subservice/internal/models"
+	"subservice/pkg/postgres"
 )
 
 type SubscriptionRepository struct {
-	db *pgxpool.Pool
+	db postgres.PgxClient
 }
 
-func NewSubscriptionRepository(db *pgxpool.Pool) *SubscriptionRepository {
+func NewSubscriptionRepository(db postgres.PgxClient) *SubscriptionRepository {
 	return &SubscriptionRepository{db: db}
 }
 
