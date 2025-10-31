@@ -97,7 +97,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/subscription.SubscriptionDTO"
+                                "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                             }
                         }
                     },
@@ -142,7 +142,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Подписка создана",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -258,7 +258,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Подписка получена",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -315,7 +315,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Подписка обновлена",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -431,7 +431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "subscription.SubscriptionDTO": {
+        "subscription.SubscriptionResponseDTO": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -490,7 +490,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/api/",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",

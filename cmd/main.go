@@ -13,6 +13,7 @@ import (
 
 const defaultConfigPath = ""
 
+// @BasePath /api/
 func main() {
 	lg := slog.New(
 		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),

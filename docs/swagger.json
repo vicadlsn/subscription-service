@@ -3,6 +3,7 @@
     "info": {
         "contact": {}
     },
+    "basePath": "/api/",
     "paths": {
         "/subscriptions": {
             "get": {
@@ -86,7 +87,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/subscription.SubscriptionDTO"
+                                "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                             }
                         }
                     },
@@ -131,7 +132,7 @@
                     "201": {
                         "description": "Подписка создана",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -247,7 +248,7 @@
                     "200": {
                         "description": "Подписка получена",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -304,7 +305,7 @@
                     "200": {
                         "description": "Подписка обновлена",
                         "schema": {
-                            "$ref": "#/definitions/subscription.SubscriptionDTO"
+                            "$ref": "#/definitions/subscription.SubscriptionResponseDTO"
                         }
                     },
                     "400": {
@@ -420,7 +421,7 @@
                 }
             }
         },
-        "subscription.SubscriptionDTO": {
+        "subscription.SubscriptionResponseDTO": {
             "type": "object",
             "properties": {
                 "created_at": {
