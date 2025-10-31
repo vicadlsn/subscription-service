@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	_ "subservice/docs"
+
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
@@ -22,8 +24,10 @@ func NewRouter(subscriptionService subscription.SubscriptionService, lg *slog.Lo
 		httpSwagger.URL("/swagger/doc.json"),
 	))
 
-	subscriptionHandler := subscription.NewSubscriptionHandler(subscriptionService, lg, validator)
-	subscriptionHandler.Register(r)
+	r.Route("/api", func(r chi.Router) {
+		subscriptionHandler := subscription.NewSubscriptionHandler(subscriptionService, lg, validator)
+		subscriptionHandler.Register(r)
+	})
 
 	return r
 }

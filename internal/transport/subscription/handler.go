@@ -41,7 +41,7 @@ func NewSubscriptionHandler(service SubscriptionService, lg *slog.Logger, valida
 // @Accept json
 // @Produce json
 // @Param subscription body SubscriptionCreateDTO true "Данные для создания подписки"
-// @Success 201 {object} SubscriptionDTO  "Подписка создана"
+// @Success 201 {object} SubscriptionResponseDTO  "Подписка создана"
 // @Failure 400 {object} response.ErrorResponse "Неверный формат запроса"
 // @Failure 422 {object} response.ErrorResponse "Ошибка валидации"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
@@ -75,7 +75,7 @@ func (h *SubscriptionHandler) Create(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	response := ToSubscriptionDTO(*createdModel)
+	response := ToSubscriptionResponseDTO(*createdModel)
 	if err := util.WriteJSON(w, http.StatusCreated, response); err != nil {
 		log.Error("Failed to write response", slog.Any("error", err))
 		return err
@@ -90,7 +90,7 @@ func (h *SubscriptionHandler) Create(w http.ResponseWriter, r *http.Request) err
 // @Accept json
 // @Produce json
 // @Param id path string true "ID подписки (UUID)"
-// @Success 200 {object} SubscriptionDTO "Подписка получена"
+// @Success 200 {object} SubscriptionResponseDTO "Подписка получена"
 // @Failure 400 {object} response.ErrorResponse "Неверный ID подписки"
 // @Failure 404 {object} response.ErrorResponse "Подписка не найдена"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
@@ -114,7 +114,7 @@ func (h *SubscriptionHandler) GetByID(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	response := ToSubscriptionDTO(*model)
+	response := ToSubscriptionResponseDTO(*model)
 	if err := util.WriteJSON(w, http.StatusOK, response); err != nil {
 		log.Error("Failed to write response", slog.Any("error", err))
 		return err
@@ -136,7 +136,7 @@ func (h *SubscriptionHandler) GetByID(w http.ResponseWriter, r *http.Request) er
 // @Param offset query int false "Отступ (по умолчанию 0)" minimum(0)
 // @Param sort_by query string false "Поле для сортировки" Enums(start_date,end_date,price,created_at)
 // @Param sort_order query string false "Порядок сортировки" Enums(asc,desc)
-// @Success 200 {array} SubscriptionDTO "Список подписок получен"
+// @Success 200 {array} SubscriptionResponseDTO "Список подписок получен"
 // @Failure 400 {object} response.ErrorResponse "Неверные параметры запроса"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /subscriptions [get]
@@ -158,9 +158,9 @@ func (h *SubscriptionHandler) List(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	responses := make([]SubscriptionDTO, 0, len(models))
+	responses := make([]SubscriptionResponseDTO, 0, len(models))
 	for _, m := range models {
-		responses = append(responses, ToSubscriptionDTO(m))
+		responses = append(responses, ToSubscriptionResponseDTO(m))
 	}
 
 	if err := util.WriteJSON(w, http.StatusOK, responses); err != nil {
@@ -178,7 +178,7 @@ func (h *SubscriptionHandler) List(w http.ResponseWriter, r *http.Request) error
 // @Produce json
 // @Param id path string true "ID подписки (UUID)"
 // @Param subscription body SubscriptionUpdateDTO true "Данные для обновления подписки"
-// @Success 200 {object} SubscriptionDTO "Подписка обновлена"
+// @Success 200 {object} SubscriptionResponseDTO "Подписка обновлена"
 // @Failure 400 {object} response.ErrorResponse "Неверное тело запроса или неверный ID"
 // @Failure 404 {object} response.ErrorResponse "Подписка не найдена"
 // @Failure 422 {object} response.ErrorResponse "Ошибка валидации"
@@ -219,7 +219,7 @@ func (h *SubscriptionHandler) Update(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	response := ToSubscriptionDTO(*updatedModel)
+	response := ToSubscriptionResponseDTO(*updatedModel)
 	if err := util.WriteJSON(w, http.StatusOK, response); err != nil {
 		log.Error("Failed to write response", slog.Any("error", err))
 		return err

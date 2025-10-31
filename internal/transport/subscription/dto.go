@@ -26,13 +26,13 @@ type SubscriptionUpdateDTO struct {
 	EndDate     *string `json:"end_date" validate:"omitempty"`
 }
 
-type SubscriptionDTO struct {
+type SubscriptionResponseDTO struct {
 	ID          uuid.UUID  `json:"id"`
 	UserID      uuid.UUID  `json:"user_id"`
 	ServiceName string     `json:"service_name"`
 	Price       int        `json:"price"`
-	StartDate   time.Time  `json:"start_date"`
-	EndDate     *time.Time `json:"end_date"`
+	StartDate   string  `json:"start_date"`
+	EndDate     *string `json:"end_date,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
@@ -59,6 +59,11 @@ func FromSubscriptionCreateDTO(dto SubscriptionCreateDTO) (models.Subscription, 
 		}
 		end = &et
 	}
+
+	if end != nil && start.After(*end) {
+		return models.Subscription{}, fmt.Errorf("start_date cannot be after end_date")
+	}
+
 	return models.Subscription{
 		UserID:      dto.UserID,
 		ServiceName: dto.ServiceName,
@@ -81,6 +86,11 @@ func FromSubscriptionUpdateDTO(dto SubscriptionUpdateDTO, id uuid.UUID) (models.
 		}
 		end = &et
 	}
+
+	if end != nil && start.After(*end) {
+		return models.Subscription{}, fmt.Errorf("start_date cannot be after end_date")
+	}
+	
 	return models.Subscription{
 		ID:          id,
 		ServiceName: dto.ServiceName,
@@ -90,17 +100,24 @@ func FromSubscriptionUpdateDTO(dto SubscriptionUpdateDTO, id uuid.UUID) (models.
 	}, nil
 }
 
-func ToSubscriptionDTO(model models.Subscription) SubscriptionDTO {
-	return SubscriptionDTO{
+func ToSubscriptionResponseDTO(model models.Subscription) SubscriptionResponseDTO {
+	dto := SubscriptionResponseDTO{
 		ID:          model.ID,
 		UserID:      model.UserID,
 		ServiceName: model.ServiceName,
 		Price:       model.Price,
-		StartDate:   model.StartDate,
-		EndDate:     model.EndDate,
 		CreatedAt:   model.CreatedAt,
 		UpdatedAt:   model.UpdatedAt,
 	}
+
+	dto.StartDate = model.StartDate.Format("01-2006")
+
+	if model.EndDate != nil {
+		formattedEndDate := model.EndDate.Format("01-2006")
+		dto.EndDate = &formattedEndDate
+	}
+
+	return dto
 }
 
 func SummaryFilterFromRequest(r *http.Request) (*models.CostCalculationFilter, error) {
@@ -127,9 +144,6 @@ func SummaryFilterFromRequest(r *http.Request) (*models.CostCalculationFilter, e
 	}
 	filter.EndDate = endDate
 
-	if filter.EndDate.Before(filter.StartDate) {
-		return nil, fmt.Errorf("end_date cannot be before start_date")
-	}
 
 	return filter, nil
 }
