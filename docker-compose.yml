@@ -1,4 +1,25 @@
 services:
+    app:
+        build: .
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            SERVER_HOST: 0.0.0.0
+            SERVER_PORT: "${SERVER_PORT}"
+            DB_USERNAME: ${DB_USERNAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_SCHEME: ${DB_SCHEME}
+            DB_MAX_ATTEMPTS: ${DB_MAX_ATTEMPTS}
+            DB_RETRY_DELAY: ${DB_RETRY_DELAY}
+            DB_CONNECTION_TIMEOUT: ${DB_CONNECTION_TIMEOUT}
+        ports:
+            - "${SERVER_PORT}:${SERVER_PORT}"
+        restart: "always"
+
     postgres:
         image: postgres:17-alpine
         environment:
@@ -21,7 +42,7 @@ services:
             dockerfile: Dockerfile.migrate
         environment:
             GOOSE_DRIVER: postgres
-            GOOSE_DBSTRING: "host=postgres user=${DB_USERNAME} password=${DB_PASSWORD} dbname=${DB_NAME} sslmode=disable"
+            GOOSE_DBSTRING: "host=postgres user=${DB_USERNAME} password=${DB_PASSWORD} dbname=${DB_NAME} port=5432 sslmode=disable"
             GOOSE_MIGRATION_DIR: /migration/migrations
         depends_on:
             postgres:
@@ -29,14 +50,6 @@ services:
         volumes:
             - ./migrations:/migration/migrations
         command: ["goose", "up"]
-
-    app:
-        build: .
-        depends_on:
-            - postgres
-        ports:
-            - "8081:${SERVER_PORT}"
-        restart: "always"
 
 volumes:
     pgdata:
